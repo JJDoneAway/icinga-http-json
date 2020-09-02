@@ -1,17 +1,16 @@
-![CI](https://github.com/drewkerrigan/nagios-http-json/workflows/CI/badge.svg)
+# Icinga Json Plugin
 
-# Nagios Json Plugin
+This is a generic plugin for Icinga which checks json values from a given HTTP endpoint against argument specified rules and determines the status and performance data for that service.
 
-This is a generic plugin for Nagios which checks json values from a given HTTP endpoint against argument specified rules and determines the status and performance data for that service.
-
+it is a fork of 'drewkerrigan/nagios-http-json'. We added api_key support and proxy support
 ## Links
 
 * [CLI Usage](#cli-usage)
 * [Examples](#examples)
     * [Riak Stats](docs/RIAK.md)
     * [Docker](docs/DOCKER.md)
-* [Nagios Installation](#nagios-installation)
-
+* [Icinga Installation](#Icinga-installation)
+* [Original Plugin](https://github.com/drewkerrigan/nagios-http-json)
 ## CLI Usage
 
 Executing `./check_http_json.py -h` will yield the following details:
@@ -19,6 +18,7 @@ Executing `./check_http_json.py -h` will yield the following details:
 ```
 usage: check_http_json.py [-h] [-d] [-s] -H HOST [-k] [-V] [--cacert CACERT]
                           [--cert CERT] [--key KEY] [-P PORT] [-p PATH]
+                          [--api_key API_KEY]
                           [-t TIMEOUT] [-B AUTH] [-D DATA] [-A HEADERS]
                           [-f FIELD_SEPARATOR] [-F VALUE_SEPARATOR]
                           [-w [KEY_THRESHOLD_WARNING [KEY_THRESHOLD_WARNING ...]]]
@@ -32,13 +32,11 @@ usage: check_http_json.py [-h] [-d] [-s] -H HOST [-k] [-V] [--cacert CACERT]
                           [-Y [KEY_VALUE_LIST_NOT_CRITICAL [KEY_VALUE_LIST_NOT_CRITICAL ...]]]
                           [-m [METRIC_LIST [METRIC_LIST ...]]]
 
-Check HTTP JSON Nagios Plugin
+Check HTTP JSON Icinga Plugin
 
-Generic Nagios plugin which checks json values from a given endpoint against
+Generic Icinga plugin which checks json values from a given endpoint against
 argument specified rules and determines the status and performance data for
 that service.
-
-Version: 2.0.0 (2020-03-22)
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -50,6 +48,7 @@ optional arguments:
   --cacert CACERT       SSL CA certificate
   --cert CERT           SSL client certificate
   --key KEY             SSL client key ( if not bundled into the cert )
+  --api_key             a API Key which will be added to the path (e.g.: https://foo.com/ba?key=Your_Key or https://foo.com/ba?parameter=value&key=Your_Key)
   -P PORT, --port PORT  TCP port
   -p PATH, --path PATH  Path
   -t TIMEOUT, --timeout TIMEOUT
@@ -68,12 +67,12 @@ optional arguments:
                         Warning threshold for these values
                         (key1[>alias],WarnRange key2[>alias],WarnRange).
                         WarnRange is in the format [@]start:end, more
-                        information at nagios-plugins.org/doc/guidelines.html.
+                        information at Icinga-plugins.org/doc/guidelines.html.
   -c [KEY_THRESHOLD_CRITICAL [KEY_THRESHOLD_CRITICAL ...]], --critical [KEY_THRESHOLD_CRITICAL [KEY_THRESHOLD_CRITICAL ...]]
                         Critical threshold for these values
                         (key1[>alias],CriticalRange
                         key2[>alias],CriticalRange. CriticalRange is in the
-                        format [@]start:end, more information at nagios-
+                        format [@]start:end, more information at Icinga-
                         plugins.org/doc/guidelines.html.
   -e [KEY_LIST [KEY_LIST ...]], --key_exists [KEY_LIST [KEY_LIST ...]]
                         Checks existence of these keys to determine status.
@@ -103,9 +102,9 @@ optional arguments:
   -m [METRIC_LIST [METRIC_LIST ...]], --key_metric [METRIC_LIST [METRIC_LIST ...]]
                         Gathers the values of these keys (key[>alias],
                         UnitOfMeasure,WarnRange,CriticalRange,Min,Max) for
-                        Nagios performance data. More information about Range
-                        format and units of measure for nagios can be found at
-                        nagios-plugins.org/doc/guidelines.html Additional
+                        Icinga performance data. More information about Range
+                        format and units of measure for Icinga can be found at
+                        Icinga-plugins.org/doc/guidelines.html Additional
                         formats for this parameter are: (key[>alias]),
                         (key[>alias],UnitOfMeasure),
                         (key[>alias],UnitOfMeasure,WarnRange, CriticalRange).
@@ -200,13 +199,13 @@ optional arguments:
     * **Value is greater than 1000:** `~:1000`
     * **Value is greater than or equal to 1000:** `@1000:`
 
-More info about Nagios Range format and Units of Measure can be found at [https://nagios-plugins.org/doc/guidelines.html](https://nagios-plugins.org/doc/guidelines.html).
+More info about Icinga Range format and Units of Measure can be found at [https://Icinga-plugins.org/doc/guidelines.html](https://Icinga-plugins.org/doc/guidelines.html).
 
 #### Using Headers
 
 * `./check_http_json.py -H <host>:<port> -p <path> -A '{"content-type": "application/json"}' -w "metric,RANGE"`
 
-## Nagios Installation
+## Icinga Installation
 
 ### Requirements
 
@@ -214,11 +213,11 @@ More info about Nagios Range format and Units of Measure can be found at [https:
 
 ### Configuration
 
-Assuming a standard installation of Nagios, the plugin can be executed from the machine that Nagios is running on.
+Assuming a standard installation of Icinga, the plugin can be executed from the machine that Icinga is running on.
 
 ```bash
-cp check_http_json.py /usr/local/nagios/libexec/plugins/check_http_json.py
-chmod +x /usr/local/nagios/libexec/plugins/check_http_json.py
+cp check_http_json.py /usr/local/Icinga/libexec/plugins/check_http_json.py
+chmod +x /usr/local/Icinga/libexec/plugins/check_http_json.py
 ```
 
 Add the following service definition to your server config (`localhost.cfg`):
@@ -240,7 +239,7 @@ Add the following command definition to your commands config (`commands.config`)
 
 define command{
         command_name    <command_name>
-        command_line    /usr/bin/python /usr/local/nagios/libexec/plugins/check_http_json.py -H <host>:<port> -p <path> [-e|-q|-w|-c <rules>] [-m <metrics>]
+        command_line    /usr/bin/python /usr/local/Icinga/libexec/plugins/check_http_json.py -H <host>:<port> -p <path> [-e|-q|-w|-c <rules>] [-m <metrics>]
         }
 
 ```
@@ -251,8 +250,6 @@ The Icinga2 command definition can be found here: (contrib/icinga2_check_command
 
 
 ## License
-
-    Copyright 2014-2015 Drew Kerrigan.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

@@ -438,6 +438,8 @@ def parseArgs(args):
                         dest='cert', help='SSL client certificate')
     parser.add_argument('--key', dest='key',
                         help='SSL client key ( if not bundled into the cert )')
+    parser.add_argument('--api_key', dest='api_key',
+                        help='Will add a API Key to the path (?key=your_key)')
     parser.add_argument('-P', '--port', dest='port', help='TCP port')
     parser.add_argument('-p', '--path', dest='path', help='Path')
     parser.add_argument('-t', '--timeout', type=int,
@@ -581,6 +583,11 @@ def main(cliargs):
         url += ":%s" % args.port
     if args.path:
         url += "/%s" % args.path
+    if args.api_key:
+        if '?' in url:
+            url += "&key=%s" % args.api_key
+        else:
+            url += "?key=%s" % args.api_key
 
     debugPrint(args.debug, "url:%s" % url)
     json_data = ''
