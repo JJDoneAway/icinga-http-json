@@ -18,7 +18,7 @@ Executing `./check_http_json.py -h` will yield the following details:
 ```
 usage: check_http_json.py [-h] [-d] [-s] -H HOST [-k] [-V] [--cacert CACERT]
                           [--cert CERT] [--key KEY] [-P PORT] [-p PATH]
-                          [--api_key API_KEY]
+                          [--api_key API_KEY] [--proxy proxy URL]
                           [-t TIMEOUT] [-B AUTH] [-D DATA] [-A HEADERS]
                           [-f FIELD_SEPARATOR] [-F VALUE_SEPARATOR]
                           [-w [KEY_THRESHOLD_WARNING [KEY_THRESHOLD_WARNING ...]]]
@@ -49,6 +49,7 @@ optional arguments:
   --cert CERT           SSL client certificate
   --key KEY             SSL client key ( if not bundled into the cert )
   --api_key             a API Key which will be added to the path (e.g.: https://foo.com/ba?key=Your_Key or https://foo.com/ba?parameter=value&key=Your_Key)
+  --proxy               Will use a proxy server to execute the call (e.g: http://myProxy.com:3281)
   -P PORT, --port PORT  TCP port
   -p PATH, --path PATH  Path
   -t TIMEOUT, --timeout TIMEOUT

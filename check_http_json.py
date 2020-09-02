@@ -440,6 +440,8 @@ def parseArgs(args):
                         help='SSL client key ( if not bundled into the cert )')
     parser.add_argument('--api_key', dest='api_key',
                         help='Will add a API Key to the path (?key=your_key)')
+    parser.add_argument('--proxy', dest='proxy',
+                        help='Will use a proxy server to execute the call (e.g: http://myProxy.com:3281)')
     parser.add_argument('-P', '--port', dest='port', help='TCP port')
     parser.add_argument('-p', '--path', dest='path', help='Path')
     parser.add_argument('-t', '--timeout', type=int,
@@ -594,6 +596,13 @@ def main(cliargs):
 
     try:
         req = urllib.request.Request(url)
+
+        opener = urllib.request.build_opener()
+        if args.proxy:
+            proxies = {urllib.request.urlparse(url).scheme: args.proxy}
+        else:
+            proxies = {}
+        opener.add_handler(urllib.request.ProxyHandler(proxies))
         req.add_header("User-Agent", "check_http_json")
         if args.auth:
             authbytes = str(args.auth).encode()
@@ -605,16 +614,13 @@ def main(cliargs):
             for header in headers:
                 req.add_header(header, headers[header])
         if args.timeout and args.data:
-            response = urllib.request.urlopen(req, timeout=args.timeout,
-                                              data=args.data, context=context)
+            response = opener.open(req, timeout=args.timeout, data=args.data)
         elif args.timeout:
-            response = urllib.request.urlopen(req, timeout=args.timeout,
-                                              context=context)
+            response = opener.open(req, timeout=args.timeout)
         elif args.data:
-            response = urllib.request.urlopen(req, data=args.data, context=context)
+            response = opener.open(req, data=args.data)
         else:
-            response = urllib.request.urlopen(req, context=context)
-
+            response = opener.open(req)
         json_data = response.read()
 
     except HTTPError as e:
