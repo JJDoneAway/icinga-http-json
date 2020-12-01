@@ -364,7 +364,7 @@ class JsonRuleProcessor:
             unknown += self.checkEquality(self.key_value_list_unknown)
         return unknown
 
-    def checkMetrics(self):
+    def checkMetrics(self, args):
         """
         Return a Nagios specific performance metrics string given keys
         and parameter definitions
@@ -407,6 +407,15 @@ class JsonRuleProcessor:
                                                         maximum)
                         metrics += ";%s" % maximum
                 metrics += ' '
+
+                healthiness_values= {"green": 1, "orange": 2, "red": 3, "maintenance": 4}
+                metrics += "'%s'=%s " % ("healthiness_value",  healthiness_values.setdefault(self.helper.get(key).lower(), 5))
+                metrics += "'%s'=%s " % ("lane", args.lane)
+                metrics += "'%s'=%s " % ("domain", args.domain)
+                metrics += "'%s'=%s " % ("team", args.team)
+                metrics += "'%s'=%s " % ("capability", args.capability)
+                metrics += "'%s'=%s " % ("feature", args.feature)
+                metrics += "'%s'=%s " % ("business_critical", args.business_critical)
         return ("%s" % metrics, warning, critical)
 
 
@@ -514,7 +523,18 @@ def parseArgs(args):
                         (key[>alias]), (key[>alias],UnitOfMeasure),
                         (key[>alias],UnitOfMeasure,WarnRange,
                         CriticalRange).''')
-
+    parser.add_argument('--lane', dest='lane',
+                        help='''Name of the lane''')
+    parser.add_argument('--domain', dest='domain',
+                        help='''Name of the domain''')
+    parser.add_argument('--team', dest='team',
+                        help='''Name of the team''')
+    parser.add_argument('--capability', dest='capability',
+                        help='''Name of the capability''')
+    parser.add_argument('--feature', dest='feature',
+                        help='''Name of the feature''')
+    parser.add_argument('--business_critical', dest='business_critical',
+                        help='''Is the feature business critical or not.''')
     return parser.parse_args(args)
 
 
@@ -644,7 +664,7 @@ def main(cliargs):
         processor = JsonRuleProcessor(data, args)
         nagios.append_warning(processor.checkWarning())
         nagios.append_critical(processor.checkCritical())
-        nagios.append_metrics(processor.checkMetrics())
+        nagios.append_metrics(processor.checkMetrics(args))
         nagios.append_unknown(processor.checkUnknown())
 
     # Print Nagios specific string and exit appropriately
